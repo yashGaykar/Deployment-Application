@@ -1,0 +1,51 @@
+---
+- name: Deploy NodeJS Application
+  hosts: ec2_instances
+  become: yes
+  tasks:
+    - name: Update apt cache
+      apt: 
+        update_cache: yes
+
+    - name: Install required packages
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - nodejs
+        - git
+        - npm
+
+    - name: Clone Github Repo
+      git:
+        repo: "{{ app_repo_url }}"
+        dest: '/home/ubuntu/app'
+        update: no
+
+    - name: Install pm2
+      npm:
+        name: pm2
+        state: present
+        global: yes
+
+    - name: Install application dependencies
+      npm:
+        path: '/home/ubuntu/app'
+        state: present
+    
+    - name: Start the application
+      command: pm2 start server.js
+      args: 
+        chdir: '/home/ubuntu/app'
+
+
+
+
+
+
+
+
+
+          # DATABASE_URL: "{{}}"
+          # SECRET_KEY: "{{}}"
+        
