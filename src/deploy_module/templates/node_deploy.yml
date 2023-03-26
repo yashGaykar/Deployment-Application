@@ -2,6 +2,9 @@
 - name: Deploy NodeJS Application
   hosts: ec2_instances
   become: yes
+  environment: "{{ env }}"
+  vars: 
+      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
     - name: Update apt cache
       apt: 
@@ -37,15 +40,3 @@
       command: pm2 start server.js
       args: 
         chdir: '/home/ubuntu/app'
-
-
-
-
-
-
-
-
-
-          # DATABASE_URL: "{{}}"
-          # SECRET_KEY: "{{}}"
-        
