@@ -31,8 +31,9 @@ def deploy():
 
         public_ip=instance_info["Reservations"][0]["Instances"][0]["NetworkInterfaces"][0]["Association"]["PublicIp"]
 
+        env=params['env'] if ('env' in params.keys()) else {}
         # temporary inventary file content
-        variables={'app_repo_url':params["git"]}
+        variables={'app_repo_url':params["git"], 'env' : env}
 
         file=f"[ec2_instances]\n{public_ip}\n\n[ec2_instances:vars]\n"
         for key,value in variables.items():

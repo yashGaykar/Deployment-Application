@@ -21,22 +21,12 @@ class RunPlaybookService:
         context.CLIARGS = ImmutableDict(
             connection='ssh',
             verbosity=2,
-            module_path=None,
-            forks=100,
-            become=None,
             remote_user='ubuntu',
             private_key_file=os.getcwd()+f'/{INSTANCE_KEY}.pem',
             become_method='sudo',
-            common_args='-o StrictHostKeyChecking=no',
-            become_user=None,
-            host_key_checking=False,
             check=False,
-            listhosts=None,
-            listtasks=None,
-            listtags=None,
             syntax=None,
             start_at_task=None,
-            display=None
         )
 
         self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
