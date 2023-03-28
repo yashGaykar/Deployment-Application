@@ -1,15 +1,5 @@
-from flask import Flask, jsonify
 
-from .deploy_module import deploy_bp
-
-app = Flask(__name__)
+from celery import Celery
 
 
-
-app.register_blueprint(deploy_bp)
-
-
-@app.route('/')
-def hello1():
-    """DEMO ROUTE"""
-    return jsonify("Hello")
+celery1 = Celery('task', config_source='src.celeryconfig')

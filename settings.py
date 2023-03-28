@@ -13,6 +13,10 @@ SSM_ROLE_ARN=os.environ.get("SSM_ROLE_ARN")
 AWS_REGION=os.environ.get("AWS_REGION")
 INSTANCE_USER_NAME=os.environ.get("INSTANCE_USER_NAME")
 
+BROKER_URL=os.environ.get("BROKER_URL")
+BACKEND_URL=os.environ.get("BACKEND_URL")
+
+
 
 
 
