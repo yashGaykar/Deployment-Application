@@ -1,4 +1,5 @@
 import os
+import time
 
 from settings import *
 
@@ -37,7 +38,7 @@ class RunPlaybookService:
         try:
 
             # Create the playbook executor
-            playbook_executor = PlaybookExecutor(
+            pbex = PlaybookExecutor(
                 playbooks=[file],
                 inventory=self.inventory,
                 variable_manager=self.variable_manager,
@@ -46,9 +47,8 @@ class RunPlaybookService:
             )
 
             # Execute the playbook
-            response=playbook_executor.run()
-            # Remove the temporary inventory file
-            os.remove(self.inventory_file.name)
+            response=pbex.run()
+
             # Return a response
             return (response)
 
@@ -75,5 +75,8 @@ class DeployService:
         # waits until instance is in ready state
         waiter = ec2.get_waiter('instance_running')
         waiter.wait(InstanceIds=[instance_id])
+
+        time.sleep(10)
+
 
         return instance_id

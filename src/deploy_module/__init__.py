@@ -10,5 +10,11 @@ deploy_bp = Blueprint(
 
 # Deploy Node
 deploy_bp.add_url_rule(
-    '/deploy', 'deploy', deploy, methods=['POST'])
+    '/deploy', 'async_deploy', async_deploy, methods=['POST'])
+
+deploy_bp.add_url_rule(
+    '/taskstatus','taskstatus', taskstatus, methods=['GET']
+)
+
+
 
