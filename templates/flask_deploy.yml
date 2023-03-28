@@ -2,10 +2,23 @@
 - name: Deploy Flask Application
   hosts: ec2_instances
   become: yes
-  environment: "{{ env }}"
+  environment: "{{ env }}"           
   vars: 
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
   tasks:
+
+    - name: Check Port Status Stopped
+      wait_for:
+        port: "{{ item }}"
+        state: stopped     
+        delay: 0          
+        timeout: 10
+      ignore_errors: no
+      with_items:
+        - 5000
+
+
     - name: Update apt cache
       apt: 
         update_cache: yes
@@ -20,11 +33,13 @@
         - python3-venv
         - git
 
-    - name: Clone Github Repo
+    - name: Clone Github Repo      
       git:
         repo: "{{ app_repo_url }}"
         dest: /home/ubuntu/app
         update: yes
+      timeout: 60
+
     - name: Set up Virtual Env
       command: python3 -m venv /home/ubuntu/app/venv
       args: 
@@ -46,7 +61,14 @@
       args: 
         chdir: /home/ubuntu/app
 
-
-
-
+    - name: Check all port numbers are accessible from the current host
+      wait_for:
+        port: "{{ item }}"
+        state: started     
+        delay: 5           
+        timeout: 100        
+      ignore_errors: no
+      with_items:
+        - 22
+        - 3000
 

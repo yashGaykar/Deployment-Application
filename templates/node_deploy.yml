@@ -6,6 +6,17 @@
   vars: 
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
+
+    - name: Check Port Status Stopped
+      wait_for:
+        port: "{{ item }}"
+        state: stopped     
+        delay: 0          
+        timeout: 10
+      ignore_errors: no
+      with_items:
+        - 3000
+
     - name: Update apt cache
       apt: 
         update_cache: yes
@@ -24,7 +35,8 @@
         repo: "{{ app_repo_url }}"
         dest: '/home/ubuntu/app'
         update: no
-
+      timeout: 60
+      
     - name: Install pm2
       npm:
         name: pm2
@@ -40,3 +52,15 @@
       command: pm2 start server.js
       args: 
         chdir: '/home/ubuntu/app'
+
+    - name: Check all port numbers are accessible from the current host
+      wait_for:
+        port: "{{ item }}"
+        state: started     
+        delay: 5           
+        timeout: 100        
+      ignore_errors: no
+      with_items:
+        - 22
+        - 3000
+
