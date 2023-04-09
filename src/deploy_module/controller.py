@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from .schema import DeploySchema
 
-from settings import *
+from src.settings import *
 from .tasks import deploy
 
 
