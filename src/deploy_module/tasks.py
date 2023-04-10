@@ -1,20 +1,13 @@
-
-import tempfile
-import time
-import subprocess
-import os
-import configparser
-
-
 from ..utils  import create_client
 from .service import DeployService,RunPlaybookService
 from src.settings import *
 
-
-
-
+import tempfile
+import time
+import os
 from .. import celery1
 from ..settings import AWS_REGION,AWS_SECRET_ACCESS_KEY,AWS_KEY,INSTANCE_KEY,INSTANCE_TYPE
+from .constants import ANSIBLE_FLASK_TEMPLATE,ANSIBLE_NODE_TEMPLATE
 
 
 @celery1.task(time_limit=400)
@@ -26,6 +19,8 @@ def  deploy(params):
                 raise Exception("Project Already Exists")        
             DeployService.execute_command(['cp','./templates/terraform/main.tf',f'./infras/{params["project_name"]}'],f'{path}')
             DeployService.execute_command(['terraform','init'],f'{path}/infras/{params["project_name"]}')
+            
+            # Variables to be passed for terraform
             terraform_env={
                 "TF_VAR_aws_region":AWS_REGION,
                 "TF_VAR_aws_access_key":AWS_KEY,
@@ -36,9 +31,10 @@ def  deploy(params):
                 "TF_VAR_instance_type":INSTANCE_TYPE,
             }
 
+            #create infra-structure
             output=DeployService.execute_command(['terraform','apply','--auto-approve'],f'{path}/infras/{params["project_name"]}',terraform_env)
             public_ip=output[0][-18:].split("\"")[1]
-            time.sleep(30)
+            time.sleep(20)
 
 
             env=params['env'] if ('env' in params.keys()) else {}
@@ -67,13 +63,13 @@ def  deploy(params):
 
             if params["app_type"]=="flask":
                 # deploy a flask app
-                output =deploy_service.run_playbook('./templates/ansible/flask_deploy.yml')
+                output =deploy_service.run_playbook(ANSIBLE_FLASK_TEMPLATE)
                 print(output)
 
             elif params["app_type"]=="node":
 
                 # deploy a node app
-                output =deploy_service.run_playbook('./templates/ansible/node_deploy.yml')
+                output =deploy_service.run_playbook(ANSIBLE_NODE_TEMPLATE)
                 print(output)
 
             else:

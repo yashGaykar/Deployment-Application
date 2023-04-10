@@ -92,7 +92,7 @@ class DeployService:
             command, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd,env=env)
 
         output = []
-        proc.wait()
+        proc.wait()          
 
         while True:
             proc.poll()
