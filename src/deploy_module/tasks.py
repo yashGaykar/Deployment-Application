@@ -38,23 +38,16 @@ def  deploy(params):
 
 
             env=params['env'] if ('env' in params.keys()) else {}
-            print(env)
 
             port= params['port']
             env['PORT']=port
-            print(port)
 
             # temporary inventary file content
             variables={'app_repo_url':params["git"], 'env' : env,'port': port}
-            print (variables)
         
             file=f"[ec2_instances]\n{public_ip}\n\n[ec2_instances:vars]\n"
             for key,value in variables.items():
                 file+=f'{key}={value}\n'
-
-            print(file)
-
-
 
             # temporary inventary file
             inventory_file = tempfile.NamedTemporaryFile(delete=False)
