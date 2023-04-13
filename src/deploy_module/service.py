@@ -63,7 +63,7 @@ class RunPlaybookService:
 
 
 class DeployService:
-    
+
     def create_instance(ec2):
 
         # create a instance
@@ -89,10 +89,10 @@ class DeployService:
     def execute_command(command, cwd, env={}):
 
         proc = subprocess.Popen(
-            command, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd,env=env)
+            command, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
 
         output = []
-        proc.wait()          
+        proc.wait()
 
         while True:
             proc.poll()
@@ -110,8 +110,7 @@ class DeployService:
             if proc.returncode != 0:
                 raise Exception(f"Error while running command {command}")
 
-        if(output):
-            print (output)
+        if (output):
+            print(output)
             return output
-        return("No output")
-
+        return ("No output")

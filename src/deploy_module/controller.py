@@ -40,6 +40,6 @@ def taskstatus():
             'state': task.state,
             'status': str(task.info),
         }
-    return jsonify(response)
+    return jsonify(response),HTTPStatus.OK
 
 
