@@ -3,7 +3,7 @@ from http import HTTPStatus
 
 from .schema import DeploySchema
 
-from settings import *
+from src.settings import *
 from .tasks import deploy
 
 
@@ -40,6 +40,6 @@ def taskstatus():
             'state': task.state,
             'status': str(task.info),
         }
-    return jsonify(response)
+    return jsonify(response),HTTPStatus.OK
 
 

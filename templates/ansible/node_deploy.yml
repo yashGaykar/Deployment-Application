@@ -1,23 +1,21 @@
 ---
-- name: Deploy Flask Application
+- name: Deploy NodeJS Application
   hosts: ec2_instances
   become: yes
-  environment: "{{ env }}"           
+  environment: "{{ env }}"
   vars: 
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-
   tasks:
 
     - name: Check Port Status Stopped
       wait_for:
         port: "{{ item }}"
         state: stopped     
-        delay: 0          
-        timeout: 10
+        delay: 4         
+        timeout: 30
       ignore_errors: no
       with_items:
-        - 5000
-
+        - "{{ port }}"
 
     - name: Update apt cache
       apt: 
@@ -28,38 +26,32 @@
         name: "{{ item }}"
         state: present
       with_items:
-        - python3
-        - python3-pip
-        - python3-venv
+        - nodejs
         - git
+        - npm
 
-    - name: Clone Github Repo      
+    - name: Clone Github Repo
       git:
         repo: "{{ app_repo_url }}"
-        dest: /home/ubuntu/app
-        update: yes
+        dest: '/home/ubuntu/app'
+        update: no
       timeout: 60
-
-    - name: Set up Virtual Env
-      command: python3 -m venv /home/ubuntu/app/venv
-      args: 
-        chdir: /home/ubuntu/app
-        creates: /home/ubuntu/app/venv
+      
+    - name: Install pm2
+      npm:
+        name: pm2
+        state: present
+        global: yes
 
     - name: Install application dependencies
-      pip:
-        requirements: /home/ubuntu/app/requirements.txt
-        virtualenv: /home/ubuntu/app/venv
-
-    - name: Set up Gunicorn
-      pip: 
-        name: gunicorn
-        virtualenv: /home/ubuntu/app/venv
-
+      npm:
+        path: '/home/ubuntu/app'
+        state: present
+    
     - name: Start the application
-      command: /home/ubuntu/app/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:5000 src:app -D
+      command: pm2 start server.js
       args: 
-        chdir: /home/ubuntu/app
+        chdir: '/home/ubuntu/app'
 
     - name: Check all port numbers are accessible from the current host
       wait_for:
@@ -69,6 +61,5 @@
         timeout: 100        
       ignore_errors: no
       with_items:
-        - 22
-        - 3000
+        - "{{ port }}"
 

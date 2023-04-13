@@ -6,3 +6,5 @@ class DeploySchema(Schema):
     git=fields.Str(required=True)
     env=fields.Dict()
     instance_id=fields.Str()
+    port=fields.Number(required=True)
+    project_name=fields.Str(required=True)

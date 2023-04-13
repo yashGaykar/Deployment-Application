@@ -1,7 +1,10 @@
 import os
 import time
 
-from settings import *
+from src.settings import *
+import subprocess
+import time
+
 
 from ansible import context
 from ansible.module_utils.common.collections import ImmutableDict
@@ -10,14 +13,16 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 from ansible.executor.playbook_executor import PlaybookExecutor
 
+
 class RunPlaybookService:
     def __init__(self, inventory_file):
 
         # all the files for running playbook
         self.loader = DataLoader()
-        self.inventory = InventoryManager(loader=self.loader, sources=[inventory_file.name])
-        self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
-
+        self.inventory = InventoryManager(
+            loader=self.loader, sources=[inventory_file.name])
+        self.variable_manager = VariableManager(
+            loader=self.loader, inventory=self.inventory)
 
         context.CLIARGS = ImmutableDict(
             connection='ssh',
@@ -30,11 +35,12 @@ class RunPlaybookService:
             start_at_task=None,
         )
 
-        self.variable_manager = VariableManager(loader=self.loader, inventory=self.inventory)
+        self.variable_manager = VariableManager(
+            loader=self.loader, inventory=self.inventory)
 
         self.passwords = {}
 
-    def run_playbook(self,file):
+    def run_playbook(self, file):
         try:
 
             # Create the playbook executor
@@ -47,7 +53,7 @@ class RunPlaybookService:
             )
 
             # Execute the playbook
-            response=pbex.run()
+            response = pbex.run()
 
             # Return a response
             return (response)
@@ -56,8 +62,8 @@ class RunPlaybookService:
             raise Exception(e)
 
 
-
 class DeployService:
+
     def create_instance(ec2):
 
         # create a instance
@@ -68,8 +74,8 @@ class DeployService:
             InstanceType=INSTANCE_TYPE,
             KeyName=INSTANCE_KEY,
         )
-        
-        instance_id=instances["Instances"][0]["InstanceId"]
+
+        instance_id = instances["Instances"][0]["InstanceId"]
         print(instance_id)
 
         # waits until instance is in ready state
@@ -78,5 +84,33 @@ class DeployService:
 
         time.sleep(10)
 
-
         return instance_id
+
+    def execute_command(command, cwd, env={}):
+
+        proc = subprocess.Popen(
+            command, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
+
+        output = []
+        proc.wait()
+
+        while True:
+            proc.poll()
+
+            stdout, stderr = proc.communicate()
+            if stdout:
+                output.append(stdout.decode('utf-8'))
+            if stderr:
+                output.append(stderr.decode('utf-8'))
+
+            if proc.returncode is not None:
+                break
+            time.sleep(0.01)
+
+            if proc.returncode != 0:
+                raise Exception(f"Error while running command {command}")
+
+        if (output):
+            print(output)
+            return output
+        return ("No output")

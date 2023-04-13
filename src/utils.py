@@ -1,5 +1,5 @@
 import boto3
-from settings import *
+from src.settings import *
 
 def create_client(resource:str):
     client = boto3.client(resource, aws_access_key_id=AWS_KEY,
