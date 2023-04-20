@@ -1,0 +1,21 @@
+---
+   - name: Set up Virtual Env
+     command: python3 -m venv /home/ubuntu/app/venv
+     args: 
+       chdir: /home/ubuntu/app
+       creates: /home/ubuntu/app/venv 
+
+   - name: Install application dependencies
+     pip:
+       requirements: /home/ubuntu/app/requirements.txt
+       virtualenv: /home/ubuntu/app/venv 
+       
+   - name: Set up Gunicorn
+     pip: 
+       name: gunicorn
+       virtualenv: /home/ubuntu/app/venv 
+
+   - name: Start the application
+     command: "/home/ubuntu/app/venv/bin/gunicorn --workers 4 --bind 0.0.0.0:{{ port }} src:app -D"
+     args: 
+       chdir: /home/ubuntu/app

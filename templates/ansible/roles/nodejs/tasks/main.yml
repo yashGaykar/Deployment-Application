@@ -1,0 +1,28 @@
+---
+  - name: Update apt cache
+    apt: 
+      update_cache: yes
+
+  - name: Install required packages
+    apt:
+      name: "{{ item }}"
+      state: present
+    with_items:
+      - nodejs
+      - git
+      - npm
+
+
+      
+  # - name: Install Node.js
+  #   become: true
+  #   apt:
+  #     name: nodejs
+  #     state: present
+
+  # - name: Install npm
+  #   become: true
+  #   apt:
+  #     name: npm
+  #     state: present
+

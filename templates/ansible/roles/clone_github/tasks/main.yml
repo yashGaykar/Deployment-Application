@@ -1,0 +1,7 @@
+---
+  - name: Clone Github Repo
+    git:
+      repo: "{{ app_repo_url }}"
+      dest: '/home/ubuntu/app'
+      update: no
+    timeout: 60

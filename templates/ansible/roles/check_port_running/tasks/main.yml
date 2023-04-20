@@ -1,0 +1,11 @@
+---
+# tasks file for check_port_running
+    - name: Check all port numbers are accessible from the current host
+      wait_for:
+        port: "{{ item }}"
+        state: started     
+        delay: 5           
+        timeout: 100        
+      ignore_errors: no
+      with_items:
+        - "{{ port }}"
