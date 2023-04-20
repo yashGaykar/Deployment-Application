@@ -5,6 +5,8 @@ from .schema import DeploySchema
 
 from src.settings import *
 from .tasks import deploy
+from .service import DeployService
+
 
 
 
@@ -19,6 +21,14 @@ def async_deploy():
 
     task=deploy.apply_async(args=[params])
     return jsonify({"id":str(task)}),HTTPStatus.OK
+
+
+def clean_up():
+    params=request.get_json()
+
+    out=DeployService.execute_command(['terraform','destroy','--force'],f'./infras/{params["project_name"]}')
+    print(out)
+    return jsonify(out)
 
 def taskstatus():
     params=request.get_json()
