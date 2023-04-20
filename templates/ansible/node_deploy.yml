@@ -1,65 +1,14 @@
 ---
-- name: Deploy NodeJS Application
-  hosts: ec2_instances
-  become: yes
-  environment: "{{ env }}"
+- name: Deploy Node.js application
+  hosts: ec2-instances
+  become: true
+  environment: "{{env}}"
   vars: 
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
-  tasks:
 
-    - name: Check Port Status Stopped
-      wait_for:
-        port: "{{ item }}"
-        state: stopped     
-        delay: 4         
-        timeout: 30
-      ignore_errors: no
-      with_items:
-        - "{{ port }}"
-
-    - name: Update apt cache
-      apt: 
-        update_cache: yes
-
-    - name: Install required packages
-      apt:
-        name: "{{ item }}"
-        state: present
-      with_items:
-        - nodejs
-        - git
-        - npm
-
-    - name: Clone Github Repo
-      git:
-        repo: "{{ app_repo_url }}"
-        dest: '/home/ubuntu/app'
-        update: no
-      timeout: 60
-      
-    - name: Install pm2
-      npm:
-        name: pm2
-        state: present
-        global: yes
-
-    - name: Install application dependencies
-      npm:
-        path: '/home/ubuntu/app'
-        state: present
-    
-    - name: Start the application
-      command: pm2 start server.js
-      args: 
-        chdir: '/home/ubuntu/app'
-
-    - name: Check all port numbers are accessible from the current host
-      wait_for:
-        port: "{{ item }}"
-        state: started     
-        delay: 5           
-        timeout: 100        
-      ignore_errors: no
-      with_items:
-        - "{{ port }}"
-
+  roles:
+   - check_port_available
+   - nodejs
+   - clone_github
+   - node_deploy
+   - check_port_running

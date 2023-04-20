@@ -1,0 +1,17 @@
+---
+  - name: Install PM2
+    become: true
+    npm:
+      name: pm2
+      state: present
+      global: yes
+
+  - name: Install application dependencies
+    npm:
+      path: '/home/ubuntu/app'
+      state: present
+  
+  - name: Start the application
+    command: pm2 start server.js
+    args: 
+      chdir: '/home/ubuntu/app'

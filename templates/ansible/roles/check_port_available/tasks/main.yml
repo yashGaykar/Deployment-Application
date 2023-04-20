@@ -1,0 +1,11 @@
+---
+# tasks file for check_port_running
+    - name: Check Port Status Stopped
+      wait_for:
+        port: "{{ item }}"
+        state: stopped     
+        delay: 4         
+        timeout: 30
+      ignore_errors: no
+      with_items:
+        - "{{ port }}"
