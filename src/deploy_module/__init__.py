@@ -16,5 +16,8 @@ deploy_bp.add_url_rule(
     '/taskstatus','taskstatus', taskstatus, methods=['GET']
 )
 
+deploy_bp.add_url_rule(
+    '/cleanup','cleanup', clean_up, methods=['POST']
+)
 
 
