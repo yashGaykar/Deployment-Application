@@ -5,6 +5,11 @@ import pytest
 import requests
 import random
 
+from dotenv import load_dotenv
+import os
+
+dotenv_path = '.env'
+load_dotenv(dotenv_path)
 
 class TestDeployApp:
 
@@ -13,14 +18,15 @@ class TestDeployApp:
         random_num=random.randint(999,99999)
         global data
         data={
-            "git": "https://github.com/yashGaykar/nodejs_practice.git",
-            "app_type": "node",
+            "git": os.environ.get("GIT_HUB_LINK")
+,
+            "app_type": os.environ.get("APP_TYPE"),
             "env": {
-                "DATABASE_URI": "mongodb+srv://yashgaykar:Gaya%40193@cluster0.nj9yven.mongodb.net/?retryWrites=true&w=majority",
-                "JWT_SECRET_KEY": "SecretKey"
+                "DATABASE_URI": os.environ.get("DATABASE_URI"),
+                "JWT_SECRET_KEY": os.environ.get("SECRET_KEY")
             },
             "project_name": f"AVI{random_num}",
-            "port": "3000"
+            "port": os.environ.get("PORT")
         }
 
 
@@ -98,14 +104,3 @@ class TestDeployApp:
             state=response_2.json()["state"]
         assert response_2.json()["state"]== 'FAILURE'
         assert 'Project already exists' in str(response_2.json()["status"])
-
-    
-
-
-        
-
-
-    
-
-        
-        
