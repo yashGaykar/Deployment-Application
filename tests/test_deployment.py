@@ -36,37 +36,35 @@ class TestDeployApp:
         dict.pop("app_type")
         response=requests.post(deploy_url,json=dict)
         assert response.status_code == 400
+        assert "'app_type': ['Missing data for required field.']" in str(response.json())
 
     def test_app_type_invalid(self):
         dict=data.copy()
         dict["app_type"]="h"
         response=requests.post(deploy_url,json=dict)
         assert response.status_code == 400
+        assert "'app_type': ['Invalid value.']" in str(response.json())
 
     def test_git_link_missing(self):
         dict=data.copy()
         dict.pop("git")
         response=requests.post(deploy_url,json=dict)
         assert response.status_code == 400
+        assert "'git': ['Missing data for required field.']" in str(response.json())
     
     def test_port_missing(self):
         dict=data.copy()
         dict.pop("port")
         response=requests.post(deploy_url,json=dict)
         assert response.status_code == 400
+        assert "'port': ['Missing data for required field.']" in str(response.json())
 
     def test_project_name_missing(self):
         dict=data.copy()
         dict.pop("project_name")
         response=requests.post(deploy_url,json=dict)
         assert response.status_code == 400
-
-
-    def test_git_link_missing(self):
-        dict=data.copy()
-        dict.pop("git")
-        response=requests.post(deploy_url,json=dict)
-        assert response.status_code == 400
+        assert "'project_name': ['Missing data for required field.']" in str(response.json())
 
 
     def test_success(self):
