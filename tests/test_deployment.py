@@ -82,11 +82,12 @@ class TestDeployApp:
         state="PENDING"
         while(state=="PENDING"):
             
-            response_2=requests.get(status_url,json={"id1":id})
+            status_response=requests.get(status_url,json={"id1":id})
             print(f"Deployment in Process")
-            state=response_2.json()["state"]
+            state=status_response.json()["state"]
             time.sleep(20)
-        assert 'Successfully Deployed the Application' in str(response_2.json()["status"])
+        assert status_response.status_code == 200
+        assert 'Successfully Deployed the Application' in str(status_response.json()["status"])
 
     
     def test_project_with_name_already_exists(self):
@@ -99,8 +100,9 @@ class TestDeployApp:
         state="PENDING"
         while(state=="PENDING"):
             time.sleep(2)
-            response_2=requests.get(status_url,json={"id1":id})
-            print(response_2.json())
-            state=response_2.json()["state"]
-        assert response_2.json()["state"]== 'FAILURE'
-        assert 'Project already exists' in str(response_2.json()["status"])
+            status_response=requests.get(status_url,json={"id1":id})
+            print(status_response.json())
+            state=status_response.json()["state"]
+        assert status_response.status_code == 200
+        assert status_response.json()["state"]== 'FAILURE'
+        assert 'Project already exists' in str(status_response.json()["status"])
