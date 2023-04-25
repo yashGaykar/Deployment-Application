@@ -1,4 +1,4 @@
-from flask.helpers import get_debug_flag
+""""INIT_CELERY"""
 from . import celery1
 from .app import create_app
 from .utility.celery_util import init_celery

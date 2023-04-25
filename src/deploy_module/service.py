@@ -1,10 +1,10 @@
+"""DEPLOYMENT SERVICE  FILE"""
+
+
 import os
 import time
 
-from src.settings import *
 import subprocess
-import time
-
 
 from ansible import context
 from ansible.module_utils.common.collections import ImmutableDict
@@ -13,11 +13,16 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 from ansible.executor.playbook_executor import PlaybookExecutor
 
+from src.settings import INSTANCE_KEY, INSTANCE_TYPE, IMAGE_ID
+from src.settings import AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_KEY
+from .constants import INSTANCE_AMI
+
 
 class RunPlaybookService:
-    def __init__(self, inventory_file):
+    """RUN PLAYBOOK SERVICE"""
 
-        # all the files for running playbook
+    def __init__(self, inventory_file):
+        """all the files for running playbook"""
         self.loader = DataLoader()
         self.inventory = InventoryManager(
             loader=self.loader, sources=[inventory_file.name])
@@ -41,6 +46,7 @@ class RunPlaybookService:
         self.passwords = {}
 
     def run_playbook(self, file):
+        """RUN A PLAYBOOK"""
         try:
 
             # Create the playbook executor
@@ -56,17 +62,18 @@ class RunPlaybookService:
             response = pbex.run()
 
             # Return a response
-            return (response)
+            return response
 
-        except Exception as e:
-            raise Exception(e)
+        except Exception as error:
+            raise Exception(error)
 
 
 class DeployService:
+    """DEPLOY SERVICE"""
 
+    @staticmethod
     def create_instance(ec2):
-
-        # create a instance
+        """CREATE INSTANCE"""
         instances = ec2.run_instances(
             ImageId=IMAGE_ID,
             MinCount=1,
@@ -86,7 +93,9 @@ class DeployService:
 
         return instance_id
 
+    @staticmethod
     def execute_command(command, cwd, env={}):
+        """EXCEUTE A COMMAND"""
 
         proc = subprocess.Popen(
             command, stdin=None, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=cwd, env=env)
@@ -110,7 +119,22 @@ class DeployService:
             if proc.returncode != 0:
                 raise Exception(f"Error while running command {command}")
 
-        if (output):
+        if output:
             print(output)
             return output
-        return ("No output")
+        return "No output"
+
+    @staticmethod
+    def terraform_env(port):
+        """TERRAFORM ENVIRONMENT VARIABLES"""
+        env = {
+            "TF_VAR_aws_region": AWS_REGION,
+            "TF_VAR_aws_access_key": AWS_KEY,
+            "TF_VAR_aws_secret_access_key": AWS_SECRET_ACCESS_KEY,
+            "TF_VAR_app_port": port,
+            "TF_VAR_instance_ami": INSTANCE_AMI,
+            "TF_VAR_instance_key": INSTANCE_KEY,
+            "TF_VAR_instance_type": INSTANCE_TYPE,
+        }
+
+        return env

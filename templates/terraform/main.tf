@@ -1,7 +1,6 @@
 variable "app_port" {
   type        = string
 }
-
 variable "instance_ami" {
   type        = string
 }
@@ -20,8 +19,6 @@ variable "aws_access_key" {
 variable "aws_secret_access_key" {
   type        = string
 }
-
-
 
 
 
