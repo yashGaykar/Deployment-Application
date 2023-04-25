@@ -135,5 +135,3 @@ dmypy.json
 # AWS KEYS
 *.pem
 
-
-infras/
