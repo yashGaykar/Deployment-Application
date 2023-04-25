@@ -3,6 +3,7 @@
 
 import os
 import time
+import shutil
 
 import subprocess
 
@@ -136,5 +137,15 @@ class DeployService:
             "TF_VAR_instance_key": INSTANCE_KEY,
             "TF_VAR_instance_type": INSTANCE_TYPE,
         }
-
         return env
+
+    @staticmethod
+    def check_project_exists(project_name):
+        """CHECKS IF THE PROJECT EXISTS"""
+        infrastructure_exists = os.path.exists(f'./infras/{project_name}')
+        return infrastructure_exists
+
+    @staticmethod
+    def delete_project_folder(project_name):
+        """Deletes the infrastructure details folder """
+        shutil.rmtree(f'./infras/{project_name}')
