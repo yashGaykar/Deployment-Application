@@ -26,7 +26,7 @@ from celery.utils.log import get_task_logger
 formatter = logging.Formatter('"%(asctime)s [%(threadName)-12.12s] %(levelname)s %(name)s: %(message)s"')
 file_handler = logging.FileHandler('logs/app.log')
 file_handler.setFormatter(formatter)
-console_handler = logging.StreamHandler()
+console_handler = logging.StreamHandler(sys.stdout)
 console_handler.setFormatter(formatter)
 
 # Set up Celery logging
