@@ -128,7 +128,7 @@ class TestDeployApp:
         assert status_response.status_code == 200
         assert 'Successfully ' in str(
             status_response.json()["status"])
-  
+
     @pytest.mark.depends(on=['test_clean_up'])
     def test_no_project_exist_to_clean_up(self):
         """PROJECT DOESN'T EXISTS"""
