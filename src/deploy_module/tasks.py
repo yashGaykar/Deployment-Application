@@ -16,15 +16,14 @@ from .constants import ANSIBLE_NODE_TEMPLATE, INVALID_APP, DEPLOYMENT_FAILED
 @celery1.task()
 def deploy(params):
     """DEPLOY"""
-    
-    out = DeployService.execute_command(
+
+    DeployService.execute_command(
         ['mkdir', f'{params["project_name"]}'], './infras')
-    if (out) and ("File exist" in out[0]):
-        raise Exception(PROJECT_EXISTS)
     DeployService.execute_command(
         ['cp', TERRAFORM_FILE, f'./infras/{params["project_name"]}'], './')
     DeployService.execute_command(
         ['terraform', 'init'], f'./infras/{params["project_name"]}')
+
     # Variables to be passed for terraform
     terraform_env = DeployService.terraform_env(params["port"])
 
@@ -80,11 +79,11 @@ def deploy(params):
 @celery1.task()
 def clean_up_task(params):
     """Variables to be passed for terraform"""
-    terraform_env = DeployService.terraform_env(params["port"])
-    print("hello")
-    out = DeployService.execute_command(
+    terraform_env = DeployService.terraform_env("3000")
+
+    DeployService.execute_command(
         ['terraform', 'destroy', '--auto-approve'],
         f'./infras/{params["project_name"]}',
         terraform_env)
-    print(out)
-    return out
+    DeployService.delete_project_folder(params["project_name"])
+    return f"Successfully Cleaned up the Infrastructure for project {params['project_name']}"

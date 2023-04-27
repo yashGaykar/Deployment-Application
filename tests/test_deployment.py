@@ -3,8 +3,9 @@
 import time
 from builtins import classmethod, print, str
 import os
-# import pytest
 import random
+
+import pytest
 import requests
 
 
@@ -33,13 +34,17 @@ class TestDeployApp:
 
         cls.deploy_url = "http://127.0.0.1:5000/api/deploy/deploy"
 
-        cls.status_url = "http://127.0.0.1:5000/api/deploy/taskstatus"
+        cls.status_url = "http://127.0.0.1:5000/api/deploy/deploy_task_status"
+
+        cls.clean_up_url = "http://127.0.0.1:5000/api/deploy/cleanup"
+
+        cls.clean_up_status_url = "http://127.0.0.1:5000/api/deploy/clean_up_task_status"
 
     def test_app_type_missing(self):
         """APP_TYPE MISSING"""
         input_data = self.data.copy()
         input_data.pop("app_type")
-        response = requests.post(self.deploy_url, json=dict, timeout=10)
+        response = requests.post(self.deploy_url, json=input_data, timeout=10)
         assert response.status_code == 400
         assert "'app_type': ['Missing data for required field.']" in str(
             response.json())
@@ -79,7 +84,7 @@ class TestDeployApp:
         assert "'project_name': ['Missing data for required field.']" in str(
             response.json())
 
-    def test_success(self):
+    def test_deploy_success(self):
         """DEPLOY SUCCESSFULLY"""
         input_data = self.data.copy()
         response = requests.post(self.deploy_url, json=input_data, timeout=10)
@@ -97,22 +102,38 @@ class TestDeployApp:
         assert 'Successfully Deployed the Application' in str(
             status_response.json()["status"])
 
+    @pytest.mark.depends(on=['test_deploy_success'])
     def test_project_with_name_already_exists(self):
         """PROJECT ALREADY EXISTS"""
         input_data = self.data.copy()
-        input_data["project_name"] = "AVI"
         response = requests.post(self.deploy_url, json=input_data, timeout=10)
+        assert response.status_code == 400
+        assert response.json()=={'error': 'Project already Exists'}
+
+    @pytest.mark.depends(on=['test_deploy_success'])
+    def test_clean_up(self):
+        """CLEAN THE INFRA STRUCTURE CREATED"""
+        input_data = self.data.copy()
+        response = requests.post(self.clean_up_url, json=input_data, timeout=10)
+
         task_id = response.json()["id"]
-        print(id)
         assert response.status_code == 200
         state = "PENDING"
         while state == "PENDING":
-            time.sleep(2)
             status_response = requests.get(
-                self.status_url, json={"id1": task_id}, timeout=10)
-            print(status_response.json())
+                self.clean_up_status_url, json={"id1": task_id}, timeout=10)
+            print("Clean Up in Process")
             state = status_response.json()["state"]
+            time.sleep(5)
         assert status_response.status_code == 200
-        assert status_response.json()["state"] == 'FAILURE'
-        assert 'Project already exists' in str(
+        assert 'Successfully ' in str(
             status_response.json()["status"])
+  
+    @pytest.mark.depends(on=['test_clean_up'])
+    def test_no_project_exist_to_clean_up(self):
+        """PROJECT DOESN'T EXISTS"""
+        input_data = self.data.copy()
+        response = requests.post(self.clean_up_url, json=input_data, timeout=10)
+        assert response.status_code == 400
+        assert response.json()=={'error': 'Project does not Exists'}
+        
