@@ -13,6 +13,7 @@ from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 from ansible.executor.playbook_executor import PlaybookExecutor
+from src.deploy_module.exceptions import CommandExecutionFailed
 
 from src.settings import INSTANCE_KEY, INSTANCE_TYPE, IMAGE_ID
 from src.settings import AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_KEY
@@ -48,25 +49,23 @@ class RunPlaybookService:
 
     def run_playbook(self, file):
         """RUN A PLAYBOOK"""
-        try:
 
-            # Create the playbook executor
-            pbex = PlaybookExecutor(
-                playbooks=[file],
-                inventory=self.inventory,
-                variable_manager=self.variable_manager,
-                loader=self.loader,
-                passwords=self.passwords,
-            )
+        # Create the playbook executor
+        pbex = PlaybookExecutor(
+            playbooks=[file],
+            inventory=self.inventory,
+            variable_manager=self.variable_manager,
+            loader=self.loader,
+            passwords=self.passwords,
+        )
 
-            # Execute the playbook
-            response = pbex.run()
+        # Execute the playbook
+        response = pbex.run()
 
-            # Return a response
-            return response
+        # Return a response
+        return response
 
-        except Exception as error:
-            raise Exception(error)
+
 
 
 class DeployService:
@@ -118,7 +117,7 @@ class DeployService:
             time.sleep(0.01)
 
             if proc.returncode != 0:
-                raise Exception(f"Error while running command {command}")
+                raise CommandExecutionFailed(data=command)
 
         if output:
             print(output)
