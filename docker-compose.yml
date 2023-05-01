@@ -1,0 +1,41 @@
+version: '3'
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.9.5
+    environment:
+      RABBITMQ_DEFAULT_USER: "yash"
+      RABBITMQ_DEFAULT_PASS: "yash"
+      RABBITMQ_DEFAULT_VHOST: "yash"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+
+  celery:
+    build: .
+    command: "celery -A src.runcelery:celery1 worker -l info --concurrency=2 --pool=threads"
+    environment:
+      - BROKER_URL=amqp://yash:yash@rabbitmq:5672/yash
+      - CELERY_RESULT_BACKEND=${BACKEND_URL}
+      - BACKEND_URL=${BACKEND_URL}
+    depends_on:
+      - rabbitmq
+
+  flask:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbitmq
+      - celery
+    environment:
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_KEY=${AWS_KEY}
+      - INSTANCE_KEY=${INSTANCE_KEY}
+      - IMAGE_ID=${IMAGE_ID}
+      - INSTANCE_TYPE=${INSTANCE_TYPE}
+      - AWS_REGION=${AWS_REGION}
+      - INSTANCE_USER_NAME=${INSTANCE_USER_NAME}
+      - BROKER_URL=amqp://yash:yash@rabbitmq:5672/yash
+      - BACKEND_URL=${BACKEND_URL}

@@ -23,7 +23,7 @@ from celery.utils.log import get_task_logger
 
 
 # Set up logging for Flask and Celery
-formatter = logging.Formatter('"%(asctime)s [%(threadName)-12.12s] %(levelname)s %(name)s: %(message)s"')
+formatter = logging.Formatter("%(asctime)s [%(threadName)-12.12s] %(levelname)s %(name)s: %(message)s")
 file_handler = logging.FileHandler('logs/app.log')
 file_handler.setFormatter(formatter)
 console_handler = logging.StreamHandler(sys.stdout)
