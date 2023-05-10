@@ -30,7 +30,7 @@ provider "aws" {
 }
 
 module "instance" {
-  source = "../../templates/terraform/modules/ec2_instance"
+  source = "../../templates/terraform/terraform_modules/ec2_instance"
   # source = "yashGaykar/ec2-instance/aws"
   # version  = "1.0.0"
   instance_ami      = var.instance_ami
@@ -40,7 +40,7 @@ module "instance" {
 }
 
 module "security_group" {
-  source = "../../templates/terraform/modules/ec2_security_group"
+  source = "../../templates/terraform/terraform_modules/ec2_security_group"
   # source = "yashGaykar/ec2-security-group/aws"
   # version  = "1.0.0"
   app_port = var.app_port
