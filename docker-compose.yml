@@ -1,0 +1,31 @@
+version: '3'
+services:
+
+  rabbitmq:
+    image: rabbitmq:3.9.5
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+      RABBITMQ_DEFAULT_VHOST: ${RABBITMQ_DEFAULT_VHOST}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  flask:
+    build: .
+    ports:
+      - "5000:5000"
+    depends_on:
+      - rabbitmq
+    volumes:
+      - .:/app
+    environment:
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_KEY=${AWS_KEY}
+      - INSTANCE_KEY=${INSTANCE_KEY}
+      - IMAGE_ID=${IMAGE_ID}
+      - INSTANCE_TYPE=${INSTANCE_TYPE}
+      - AWS_REGION=${AWS_REGION}
+      - INSTANCE_USER_NAME=${INSTANCE_USER_NAME}
+      - BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST}
+      - BACKEND_URL=${BACKEND_URL}

@@ -12,7 +12,7 @@ from .service import RunPlaybookService
 from .service import DeployService
 
 from .. import celery1
-from .constants import  TERRAFORM_FILE, ANSIBLE_FLASK_TEMPLATE
+from .constants import TERRAFORM_FILE, ANSIBLE_FLASK_TEMPLATE
 from .constants import ANSIBLE_NODE_TEMPLATE
 
 from celery.utils.log import get_task_logger
@@ -23,7 +23,8 @@ from celery.utils.log import get_task_logger
 
 
 # Set up logging for Flask and Celery
-formatter = logging.Formatter('"%(asctime)s [%(threadName)-12.12s] %(levelname)s %(name)s: %(message)s"')
+formatter = logging.Formatter(
+    "%(asctime)s [%(threadName)-12.12s] %(levelname)s %(name)s: %(message)s")
 file_handler = logging.FileHandler('logs/app.log')
 file_handler.setFormatter(formatter)
 console_handler = logging.StreamHandler(sys.stdout)
@@ -36,6 +37,8 @@ logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 # @celery1.task(task_time_limit=600,max_retries=0,timeout=600)
+
+
 @celery1.task()
 def deploy(params):
     """DEPLOY"""
@@ -58,7 +61,7 @@ def deploy(params):
         f'./infras/{params["project_name"]}',
         terraform_env)
     public_ip = output[0][-18:].split("\"")[1]
-    logger.info("Created the Infrastructure with Public IP: %s",public_ip)
+    logger.info("Created the Infrastructure with Public IP: %s", public_ip)
 
     env = params['env'] if ('env' in params.keys()) else {}
 
@@ -100,7 +103,7 @@ def deploy(params):
         print(output)
 
     if output == 0:
-        success_message=f"Successfully Deployed the Application on instance at http://{public_ip}:{port} "
+        success_message = f"Successfully Deployed the Application on instance at http://{public_ip}:{port} "
         logger.info(success_message)
         return success_message
     else:
@@ -119,6 +122,6 @@ def clean_up_task(params):
         terraform_env)
     logger.info("Deleting the Project Folder in the App")
     DeployService.delete_project_folder(params["project_name"])
-    success_message=f"Successfully Cleaned up the Infrastructure for project {params['project_name']}"
+    success_message = f"Successfully Cleaned up the Infrastructure for project {params['project_name']}"
     logger.info(success_message)
     return success_message

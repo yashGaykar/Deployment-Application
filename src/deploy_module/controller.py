@@ -4,12 +4,12 @@ from http import HTTPStatus
 import sys
 from flask import request
 
-from src.deploy_module.exceptions import  CommandExecutionFailed, DeployValidationException, DeploymentFailedException, ProjectAlreadyExistException, ProjectDoesNotExistException
+from src.deploy_module.exceptions import CommandExecutionFailed, DeployValidationException, DeploymentFailedException, ProjectAlreadyExistException, ProjectDoesNotExistException
 
 from .schema import DeploySchema
 from .tasks import deploy, clean_up_task
 from .service import DeployService
-from ..utils import json_response,error_response
+from ..utils import json_response, error_response
 
 # Creating Logger object
 logger = logging.getLogger("deploy")
@@ -37,24 +37,24 @@ def async_deploy():
         else:
             task = deploy.apply_async(args=[params])
             logger.info(
-                "Started a Async Task to Deploy app with id: %s",str(task))
+                "Started a Async Task to Deploy app with id: %s", str(task))
             return json_response({"id": str(task)}), HTTPStatus.OK
 
     except DeployValidationException as error:
-        logger.error(error.message,error.data)
-        return error_response(error.message,error.status_code,error.data)
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code, error.data)
     except ProjectAlreadyExistException as error:
-        logger.error(error.message,error.data)
-        return error_response(error.message,error.status_code,error.data)
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code, error.data)
     except DeploymentFailedException as error:
         logger.error((error.message))
-        return error_response(error.message,error.status_code)
+        return error_response(error.message, error.status_code)
     except CommandExecutionFailed as error:
-        logger.error(error.message,error.data)
-        return error_response(error.message,error.status_code)
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code)
     except Exception as error:
         logger.error(str(error))
-        return error_response(str(error),HTTPStatus.BAD_REQUEST)
+        return error_response(str(error), HTTPStatus.BAD_REQUEST)
 
 
 def clean_up():
@@ -69,21 +69,20 @@ def clean_up():
 
             task = clean_up_task.apply_async(args=[params])
             logger.info(
-                "Started a Async Task to Clean Infrastructure of %s project with id: %s",params['project_name'],task)
+                "Started a Async Task to Clean Infrastructure of %s project with id: %s", params['project_name'], task)
             return json_response({"id": str(task)}), HTTPStatus.OK
         else:
             raise ProjectDoesNotExistException(data=params['project_name'])
 
-
     except ProjectDoesNotExistException as error:
-        logger.error(error.message,error.data)
-        return error_response(error.message,error.status_code,error.data)
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code, error.data)
     except CommandExecutionFailed as error:
-        logger.error(error.message,error.data)
-        return error_response(error.message,error.status_code)
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code)
     except Exception as error:
         logger.error(str(error))
-        return error_response(str(error),HTTPStatus.BAD_REQUEST)
+        return error_response(str(error), HTTPStatus.BAD_REQUEST)
 
 
 def deploy_task_status():
@@ -104,7 +103,7 @@ def deploy_task_status():
 
     except Exception as error:
         logger.error(str(error))
-        return error_response(str(error),HTTPStatus.BAD_REQUEST)
+        return error_response(str(error), HTTPStatus.BAD_REQUEST)
 
 
 def clean_up_task_status():
@@ -124,4 +123,4 @@ def clean_up_task_status():
 
     except Exception as error:
         logger.error(str(error))
-        return error_response(str(error),HTTPStatus.BAD_REQUEST)
+        return error_response(str(error), HTTPStatus.BAD_REQUEST)
