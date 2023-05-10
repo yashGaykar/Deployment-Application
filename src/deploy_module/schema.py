@@ -2,6 +2,7 @@
 
 from marshmallow import Schema, fields
 
+
 class DeploySchema(Schema):
     """Deploy Schema"""
     app_type = fields.Str(

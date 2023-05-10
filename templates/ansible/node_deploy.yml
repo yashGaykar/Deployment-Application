@@ -3,12 +3,12 @@
   hosts: ec2-instances
   become: true
   environment: "{{env}}"
-  vars: 
-      ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  vars:
+    ansible_ssh_common_args: "-o StrictHostKeyChecking=no"
 
   roles:
-   - check_port_available
-   - nodejs
-   - clone_github
-   - node_deploy
-   - check_port_running
+    - check_port_available
+    - nodejs
+    - clone_github
+    - node_deploy
+    - check_port_running
