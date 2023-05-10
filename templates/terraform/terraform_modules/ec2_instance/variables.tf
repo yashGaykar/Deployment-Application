@@ -1,14 +1,14 @@
 variable "instance_ami" {
-  type        = string
-  default     = "ami-0557a15b87f6559cf"
+  type    = string
+  default = "ami-0557a15b87f6559cf"
 }
 variable "instance_key" {
-  type        = string
+  type = string
 }
 variable "instance_type" {
-  type        = string
-  default     = "t2.micro"
+  type    = string
+  default = "t2.micro"
 }
 variable "security_group_id" {
-  type        = string
+  type = string
 }

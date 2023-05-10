@@ -1,23 +1,23 @@
 variable "app_port" {
-  type        = string
+  type = string
 }
 variable "instance_ami" {
-  type        = string
+  type = string
 }
 variable "instance_key" {
-  type        = string
+  type = string
 }
 variable "instance_type" {
-  type        = string
+  type = string
 }
 variable "aws_region" {
-  type        = string
+  type = string
 }
 variable "aws_access_key" {
-  type        = string
+  type = string
 }
 variable "aws_secret_access_key" {
-  type        = string
+  type = string
 }
 
 
