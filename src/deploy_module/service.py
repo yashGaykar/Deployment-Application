@@ -125,7 +125,7 @@ class DeployService:
         return "No output"
 
     @staticmethod
-    def terraform_env(port):
+    def terraform_env(port,name):
         """TERRAFORM ENVIRONMENT VARIABLES"""
         env = {
             "TF_VAR_aws_region": AWS_REGION,
@@ -135,6 +135,7 @@ class DeployService:
             "TF_VAR_instance_ami": INSTANCE_AMI,
             "TF_VAR_instance_key": INSTANCE_KEY,
             "TF_VAR_instance_type": INSTANCE_TYPE,
+            "TF_VAR_project_name":name
         }
         return env
 
