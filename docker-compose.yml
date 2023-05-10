@@ -12,14 +12,14 @@ services:
       - "15672:15672"
 
 
-  celery:
-    build: .
-    command: "celery -A src.runcelery:celery1 worker -l info --concurrency=2 --pool=threads"
-    environment:
-      - BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST}
-      - CELERY_RESULT_BACKEND=${BACKEND_URL}
-    depends_on:
-      - rabbitmq
+  # celery:
+  #   build: .
+  #   command: "celery -A src.runcelery:celery1 worker -l info --concurrency=2 --pool=threads"
+  #   environment:
+  #     - BROKER_URL=amqp://${RABBITMQ_DEFAULT_USER}:${RABBITMQ_DEFAULT_PASS}@rabbitmq:5672/${RABBITMQ_DEFAULT_VHOST}
+  #     - CELERY_RESULT_BACKEND=${BACKEND_URL}
+  #   depends_on:
+  #     - rabbitmq
 
   flask:
     build: .
@@ -27,7 +27,7 @@ services:
       - "5000:5000"
     depends_on:
       - rabbitmq
-      - celery
+      # - celery
 
     environment:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
