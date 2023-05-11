@@ -52,7 +52,7 @@ def deploy(params):
         ['terraform', 'init'], f'./infras/{params["project_name"]}')
 
     # Variables to be passed for terraform
-    terraform_env = DeployService.terraform_env(params["port"])
+    terraform_env = DeployService.terraform_env(params["port"],params["project_name"])
 
     logger.info("Creating the Infrastructure to deploy the Application")
     # create infra-structure
@@ -83,7 +83,7 @@ def deploy(params):
     inventory_file.close()
 
     logger.info("Passed Inventory file to playbook")
-    deploy_service = RunPlaybookService(inventory_file)
+    deploy_service = RunPlaybookService(inventory_file,params["project_name"])
 
     # Remove the temporary inventory file
     logger.info("Removing Temporary Inventory File")
@@ -113,7 +113,7 @@ def deploy(params):
 @celery1.task()
 def clean_up_task(params):
     """Variables to be passed for terraform"""
-    terraform_env = DeployService.terraform_env("3000")
+    terraform_env = DeployService.terraform_env("3000",params["project_name"])
 
     logger.info("Destroying the Infrastructure")
     DeployService.execute_command(

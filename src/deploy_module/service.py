@@ -23,7 +23,7 @@ from .constants import INSTANCE_AMI
 class RunPlaybookService:
     """RUN PLAYBOOK SERVICE"""
 
-    def __init__(self, inventory_file):
+    def __init__(self, inventory_file,project):
         """all the files for running playbook"""
         self.loader = DataLoader()
         self.inventory = InventoryManager(
@@ -35,7 +35,7 @@ class RunPlaybookService:
             connection='ssh',
             verbosity=2,
             remote_user='ubuntu',
-            private_key_file=os.getcwd()+f'/{INSTANCE_KEY}.pem',
+            private_key_file=os.getcwd()+f'/infras/{project}/{project}.pem',
             become_method='sudo',
             check=False,
             syntax=None,
@@ -123,7 +123,7 @@ class DeployService:
         return "No output"
 
     @staticmethod
-    def terraform_env(port):
+    def terraform_env(port,project):
         """TERRAFORM ENVIRONMENT VARIABLES"""
         env = {
             "TF_VAR_aws_region": AWS_REGION,
@@ -133,6 +133,7 @@ class DeployService:
             "TF_VAR_instance_ami": INSTANCE_AMI,
             "TF_VAR_instance_key": INSTANCE_KEY,
             "TF_VAR_instance_type": INSTANCE_TYPE,
+            "TF_VAR_project_name":project
         }
         return env
 
