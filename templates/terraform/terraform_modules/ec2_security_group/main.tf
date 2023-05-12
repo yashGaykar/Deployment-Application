@@ -1,5 +1,6 @@
 # Create Security Group
 resource "aws_security_group" "my-sg" {
+  name = var.project_name
   description = "Works as a firewall"
 
   ingress {
@@ -26,7 +27,7 @@ resource "aws_security_group" "my-sg" {
   }
 
   tags = {
-    Name = "my-sg-t"
+    Name = var.project_name
   }
 }
 
