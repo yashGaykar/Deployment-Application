@@ -6,6 +6,6 @@ resource "aws_instance" "my-terraform-instance" {
   vpc_security_group_ids = [var.security_group_id]
 
   tags = {
-    Name = "my-instance-t"
+    Name = var.project_name
   }
 }
