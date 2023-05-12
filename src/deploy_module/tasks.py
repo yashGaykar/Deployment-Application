@@ -37,13 +37,11 @@ logger.addHandler(console_handler)
 logger.setLevel(logging.DEBUG)
 
 # @celery1.task(task_time_limit=600,max_retries=0,timeout=600)
-
-
 @celery1.task()
 def deploy(params):
     """DEPLOY"""
 
-    logger.info("Creating Folder for project terraform details")
+    logger.info(f"{params['project_name']}:- Creating Folder for project terraform details")
     DeployService.execute_command(
         ['mkdir', f'{params["project_name"]}'], './infras')
     DeployService.execute_command(
@@ -54,14 +52,14 @@ def deploy(params):
     # Variables to be passed for terraform
     terraform_env = DeployService.terraform_env(params["port"],params["project_name"])
 
-    logger.info("Creating the Infrastructure to deploy the Application")
+    logger.info(f"{params['project_name']}:- Creating the Infrastructure to deploy the Application")
     # create infra-structure
     output = DeployService.execute_command(
         ['terraform', 'apply', '--auto-approve'],
         f'./infras/{params["project_name"]}',
         terraform_env)
     public_ip = output[0][-18:].split("\"")[1]
-    logger.info("Created the Infrastructure with Public IP: %s", public_ip)
+    logger.info(f"{params['project_name']}:- Created the Infrastructure with Public IP: {public_ip}")
 
     env = params['env'] if ('env' in params.keys()) else {}
 
@@ -77,33 +75,34 @@ def deploy(params):
     time.sleep(20)
 
     # temporary inventary file
-    logger.info("Creating the Temporary Inventory File")
+    logger.info(f"{params['project_name']}:- Creating the Temporary Inventory File")
     inventory_file = tempfile.NamedTemporaryFile(delete=False)
     inventory_file.write(file.encode('utf-8'))
     inventory_file.close()
 
-    logger.info("Passed Inventory file to playbook")
+    logger.info(f"{params['project_name']}:- Passed Inventory file to playbook")
     deploy_service = RunPlaybookService(inventory_file,params["project_name"])
 
+
     # Remove the temporary inventory file
-    logger.info("Removing Temporary Inventory File")
+    logger.info(f"{params['project_name']}:- Removing Temporary Inventory File")
     os.remove(inventory_file.name)
 
     if params["app_type"] == "flask":
         # deploy a flask app
-        logger.info("Running a Flask Playbook")
+        logger.info(f"{params['project_name']}:- Running a Flask Playbook")
         output = deploy_service.run_playbook(ANSIBLE_FLASK_TEMPLATE)
         print(output)
 
     # elif params["app_type"] == "node":
     else:
         # deploy a node app
-        logger.info("Running a Node Playbook")
+        logger.info(f"{params['project_name']}:- Running a Node Playbook")
         output = deploy_service.run_playbook(ANSIBLE_NODE_TEMPLATE)
         print(output)
 
     if output == 0:
-        success_message = f"Successfully Deployed the Application on instance at http://{public_ip}:{port} "
+        success_message = f"{params['project_name']}:- Successfully Deployed the Application on instance at http://{public_ip}:{port} "
         logger.info(success_message)
         return success_message
     else:
@@ -115,13 +114,13 @@ def clean_up_task(params):
     """Variables to be passed for terraform"""
     terraform_env = DeployService.terraform_env("3000",params["project_name"])
 
-    logger.info("Destroying the Infrastructure")
+    logger.info(f"{params['project_name']}:- Destroying the Infrastructure")
     DeployService.execute_command(
         ['terraform', 'destroy', '--auto-approve'],
         f'./infras/{params["project_name"]}',
         terraform_env)
-    logger.info("Deleting the Project Folder in the App")
+    logger.info(f"{params['project_name']}:- Deleting the Project Folder in the App")
     DeployService.delete_project_folder(params["project_name"])
-    success_message = f"Successfully Cleaned up the Infrastructure for project {params['project_name']}"
+    success_message = f"{params['project_name']}:- Successfully Cleaned up the Infrastructure for project {params['project_name']}"
     logger.info(success_message)
     return success_message

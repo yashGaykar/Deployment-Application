@@ -4,9 +4,9 @@ from http import HTTPStatus
 import sys
 from flask import request
 
-from src.deploy_module.exceptions import CommandExecutionFailed, DeployValidationException, DeploymentFailedException, ProjectAlreadyExistException, ProjectDoesNotExistException
+from src.deploy_module.exceptions import InputValidationException, ProjectAlreadyExistException, ProjectDoesNotExistException
 
-from .schema import DeploySchema
+from .schema import CleanUpSchema, DeploySchema, TaskStatusSchema
 from .tasks import deploy, clean_up_task
 from .service import DeployService
 from ..utils import json_response, error_response
@@ -26,9 +26,10 @@ def async_deploy():
         deploy_schema = DeploySchema()
         errors = deploy_schema.validate(params)
         if errors:
-            raise DeployValidationException(data=errors)
+            raise InputValidationException(data=errors)
 
-        logger.info("Checking if project with name already exists")
+        logger.info(
+            f"{params['project_name']}:- Checking if project with name already exists")
         infrastructure_exists = DeployService.check_project_exists(
             params["project_name"])
 
@@ -37,24 +38,15 @@ def async_deploy():
         else:
             task = deploy.apply_async(args=[params])
             logger.info(
-                "Started a Async Task to Deploy app with id: %s", str(task))
+                f"{params['project_name']}:- Started a Async Task to Deploy app with id: str(task)")
             return json_response({"id": str(task)}), HTTPStatus.OK
 
-    except DeployValidationException as error:
+    except InputValidationException as error:
         logger.error(error.message, error.data)
         return error_response(error.message, error.status_code, error.data)
     except ProjectAlreadyExistException as error:
         logger.error(error.message, error.data)
         return error_response(error.message, error.status_code, error.data)
-    except DeploymentFailedException as error:
-        logger.error((error.message))
-        return error_response(error.message, error.status_code)
-    except CommandExecutionFailed as error:
-        logger.error(error.message, error.data)
-        return error_response(error.message, error.status_code)
-    except Exception as error:
-        logger.error(str(error))
-        return error_response(str(error), HTTPStatus.BAD_REQUEST)
 
 
 def clean_up():
@@ -62,14 +54,22 @@ def clean_up():
     try:
         params = request.get_json()
 
-        logger.info("Checking if project with name doesn't exists")
+        # Validating Inputs
+        logger.info("Validating the Params")
+        clean_up_schema = CleanUpSchema()
+        errors = clean_up_schema.validate(params)
+        if errors:
+            raise InputValidationException(data=errors)
+
+        logger.info(
+            f"{params['project_name']}:- Checking if project with name doesn't exists")
         infrastructure_exists = DeployService.check_project_exists(
             params["project_name"])
         if infrastructure_exists:
 
             task = clean_up_task.apply_async(args=[params])
             logger.info(
-                "Started a Async Task to Clean Infrastructure of %s project with id: %s", params['project_name'], task)
+                f"{params['project_name']}:- Started a Async Task to Clean Infrastructure of {params['project_name']} project with id: {task}")
             return json_response({"id": str(task)}), HTTPStatus.OK
         else:
             raise ProjectDoesNotExistException(data=params['project_name'])
@@ -77,12 +77,9 @@ def clean_up():
     except ProjectDoesNotExistException as error:
         logger.error(error.message, error.data)
         return error_response(error.message, error.status_code, error.data)
-    except CommandExecutionFailed as error:
+    except InputValidationException as error:
         logger.error(error.message, error.data)
-        return error_response(error.message, error.status_code)
-    except Exception as error:
-        logger.error(str(error))
-        return error_response(str(error), HTTPStatus.BAD_REQUEST)
+        return error_response(error.message, error.status_code, error.data)
 
 
 def deploy_task_status():
@@ -90,8 +87,15 @@ def deploy_task_status():
     try:
         params = request.get_json()
 
+        # Validating Inputs
+        logger.info("Validating the Params")
+        clean_up_schema = TaskStatusSchema()
+        errors = clean_up_schema.validate(params)
+        if errors:
+            raise InputValidationException(data=errors)
+
         logger.info("Getting the status of the deploy task")
-        task = deploy.AsyncResult(params["id1"])
+        task = deploy.AsyncResult(params["task_id"])
 
         response = {
             "state": task.state
@@ -101,9 +105,9 @@ def deploy_task_status():
         logger.info(response)
         return json_response(response), HTTPStatus.OK
 
-    except Exception as error:
-        logger.error(str(error))
-        return error_response(str(error), HTTPStatus.BAD_REQUEST)
+    except InputValidationException as error:
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code, error.data)
 
 
 def clean_up_task_status():
@@ -111,8 +115,15 @@ def clean_up_task_status():
     try:
         params = request.get_json()
 
+        # Validating Inputs
+        logger.info("Validating the Params")
+        clean_up_schema = TaskStatusSchema()
+        errors = clean_up_schema.validate(params)
+        if errors:
+            raise InputValidationException(data=errors)
+
         logger.info("Getting the status of the deploy task")
-        task = clean_up_task.AsyncResult(params["id1"])
+        task = clean_up_task.AsyncResult(params["task_id"])
         response = {
             "state": task.state
         }
@@ -121,6 +132,6 @@ def clean_up_task_status():
         logger.info(response)
         return json_response(response), HTTPStatus.OK
 
-    except Exception as error:
-        logger.error(str(error))
-        return error_response(str(error), HTTPStatus.BAD_REQUEST)
+    except InputValidationException as error:
+        logger.error(error.message, error.data)
+        return error_response(error.message, error.status_code, error.data)

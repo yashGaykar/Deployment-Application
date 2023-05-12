@@ -28,11 +28,11 @@ class ProjectAlreadyExistException(ApiException):
         self.status_code = HTTPStatus.CONFLICT
 
 
-class DeployValidationException(ApiException):
-    """Deploy Validation Exception"""
+class InputValidationException(ApiException):
+    """Input Validation Exception"""
 
     def __init__(self, message="Input Validation Failed", data=None):
-        super(DeployValidationException, self).__init__(message, data)
+        super(InputValidationException, self).__init__(message, data)
         self.status_code = HTTPStatus.BAD_REQUEST
 
 
