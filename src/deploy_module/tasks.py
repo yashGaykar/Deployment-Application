@@ -106,7 +106,7 @@ def deploy(params):
         logger.info(success_message)
         return success_message
     else:
-        raise DeploymentFailedException()
+        raise Exception(f"{params['project_name']}:- Deployment Failed for the Application")
 
 
 @celery1.task()

@@ -13,7 +13,6 @@ from ansible.inventory.manager import InventoryManager
 from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 from ansible.executor.playbook_executor import PlaybookExecutor
-from src.deploy_module.exceptions import CommandExecutionFailed
 
 from src.settings import INSTANCE_KEY, INSTANCE_TYPE, IMAGE_ID
 from src.settings import AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_KEY
@@ -115,7 +114,8 @@ class DeployService:
             time.sleep(0.01)
 
             if proc.returncode != 0:
-                raise CommandExecutionFailed(data=command)
+                error=f"Failed to Execute command {command}"
+                raise Exception(error)
 
         if output:
             print(output)
