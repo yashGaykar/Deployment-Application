@@ -17,4 +17,4 @@ def json_response(response):
 
 def error_response(message,statuscode,data=None):
     """Error Response"""
-    return jsonify({"message":message,"data":data}),statuscode
+    return jsonify({"message":message}),statuscode
