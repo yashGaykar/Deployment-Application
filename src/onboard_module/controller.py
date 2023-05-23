@@ -2,16 +2,16 @@
 import logging
 from http import HTTPStatus
 import sys
+import subprocess
+from .models import AWSAccount
+from ..db import db
 
 from flask import request
-from ..db import db
-from .models import AWSAccount
-import subprocess
 
 
 from ..utils import json_response, error_response
-from .exceptions import AccountNameAlreadyExists, AccountDoesNotExists, KeyAlreadyExists, NoFileFoundException, \
-    AccountIdMissing, WrongCredentials
+from .exceptions import AccountNameAlreadyExists, AccountDoesNotExists,  \
+    AccountIdMissing, WrongCredentials, KeyAlreadyExists, NoFileFoundException
 from .service import OnBoardService
 
 # Creating Logger object
@@ -55,14 +55,14 @@ def add_account():
         db.session.commit()
         logger.info(
             f"Created Account Successfully with 'id': {str(account_obj.id)}")
-        return {"id": str(account_obj.id)}
+        return json_response({"id": str(account_obj.id)})
 
     except AccountNameAlreadyExists:
         logger.info("Account Name Already Exist")
         return error_response(f"Account with name {account_name} already exists", HTTPStatus.BAD_REQUEST)
-    except WrongCredentials as wc:
+    except WrongCredentials as wc_error:
         logger.info(wc.message)
-        return error_response(wc.message, HTTPStatus.BAD_REQUEST)
+        return error_response(wc_error.message, HTTPStatus.BAD_REQUEST)
 
 
 def upload_key_pair():
@@ -82,15 +82,15 @@ def upload_key_pair():
         account = AWSAccount.query.get(account_id)
         if account is not None:
             if not account.key_name:
-                # file.save(pem_file_path)
+                file.save(pem_file_path)
                 result = subprocess.run(f"ls", cwd="./private/keys_pairs/")
                 if result.returncode == 0:
                     account.key_name = file.filename
                     db.session.add(account)
                     db.session.commit()
-                    return 'File uploaded successfully'
+                    return json_response('File uploaded successfully')
                 else:
-                    return ("Hello")
+                    return json_response('File uploaded successfully')
             else:
                 raise KeyAlreadyExists()
         else:

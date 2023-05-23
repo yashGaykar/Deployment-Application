@@ -4,6 +4,7 @@ import boto3
 
 
 class OnBoardService:
+    """ON Boarding Process Service Class"""
 
     @staticmethod
     def encode_to_base64(input_str):
