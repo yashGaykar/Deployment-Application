@@ -17,10 +17,7 @@ from .constants import ANSIBLE_NODE_TEMPLATE
 
 from celery.utils.log import get_task_logger
 
-# # Creating Logger object
-# logger = logging.getLogger("deploy")
-# logger.addHandler(logging.FileHandler('logs/app1.log'))
-
+from ..onboard_module.models import AWSAccount
 
 # Set up logging for Flask and Celery
 formatter = logging.Formatter(
@@ -41,6 +38,10 @@ logger.setLevel(logging.DEBUG)
 def deploy(params):
     """DEPLOY"""
 
+    account = AWSAccount.query.get(params["account_id"])
+    if account.key_name is None:
+        raise Exception("Key has not been uploaded for the account")
+
     logger.info(f"{params['project_name']}:- Creating Folder for project terraform details")
     DeployService.execute_command(
         ['mkdir', f'{params["project_name"]}'], './infras')
@@ -50,7 +51,7 @@ def deploy(params):
         ['terraform', 'init'], f'./infras/{params["project_name"]}')
 
     # Variables to be passed for terraform
-    terraform_env = DeployService.terraform_env(params["port"],params["project_name"])
+    terraform_env = DeployService.terraform_env(params["port"], params["project_name"], account)
 
     logger.info(f"{params['project_name']}:- Creating the Infrastructure to deploy the Application")
     # create infra-structure
@@ -81,7 +82,7 @@ def deploy(params):
     inventory_file.close()
 
     logger.info(f"{params['project_name']}:- Passed Inventory file to playbook")
-    deploy_service = RunPlaybookService(inventory_file,params["project_name"])
+    deploy_service = RunPlaybookService(inventory_file, params["project_name"], terraform_env["TF_VAR_instance_key"])
 
 
     # Remove the temporary inventory file
@@ -112,7 +113,10 @@ def deploy(params):
 @celery1.task()
 def clean_up_task(params):
     """Variables to be passed for terraform"""
-    terraform_env = DeployService.terraform_env("3000",params["project_name"])
+
+    account = AWSAccount.query.get(params["account_id"])
+
+    terraform_env = DeployService.terraform_env("3000",params["project_name"], account)
 
     logger.info(f"{params['project_name']}:- Destroying the Infrastructure")
     DeployService.execute_command(

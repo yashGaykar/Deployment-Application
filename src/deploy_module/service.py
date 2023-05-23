@@ -4,8 +4,11 @@
 import os
 import time
 import shutil
+import base64
 
 import subprocess
+
+from ..onboard_module.models import AWSAccount
 
 from ansible import context
 from ansible.module_utils.common.collections import ImmutableDict
@@ -14,15 +17,13 @@ from ansible.parsing.dataloader import DataLoader
 from ansible.vars.manager import VariableManager
 from ansible.executor.playbook_executor import PlaybookExecutor
 
-from src.settings import INSTANCE_KEY, INSTANCE_TYPE, IMAGE_ID
-from src.settings import AWS_REGION, AWS_SECRET_ACCESS_KEY, AWS_KEY
-from .constants import INSTANCE_AMI
+from .constants import INSTANCE_AMI, AWS_REGION,INSTANCE_TYPE
 
 
 class RunPlaybookService:
     """RUN PLAYBOOK SERVICE"""
 
-    def __init__(self, inventory_file,project):
+    def __init__(self, inventory_file, project, key):
         """all the files for running playbook"""
         self.loader = DataLoader()
         self.inventory = InventoryManager(
@@ -34,7 +35,7 @@ class RunPlaybookService:
             connection='ssh',
             verbosity=2,
             remote_user='ubuntu',
-            private_key_file=os.getcwd()+f'/infras/{project}/{project}.pem',
+            private_key_file=f'./private/keys_pairs/{key}.pem',
             become_method='sudo',
             check=False,
             syntax=None,
@@ -69,28 +70,6 @@ class DeployService:
     """DEPLOY SERVICE"""
 
     @staticmethod
-    def create_instance(ec2):
-        """CREATE INSTANCE"""
-        instances = ec2.run_instances(
-            ImageId=IMAGE_ID,
-            MinCount=1,
-            MaxCount=1,
-            InstanceType=INSTANCE_TYPE,
-            KeyName=INSTANCE_KEY,
-        )
-
-        instance_id = instances["Instances"][0]["InstanceId"]
-        print(instance_id)
-
-        # waits until instance is in ready state
-        waiter = ec2.get_waiter('instance_running')
-        waiter.wait(InstanceIds=[instance_id])
-
-        time.sleep(10)
-
-        return instance_id
-
-    @staticmethod
     def execute_command(command, cwd, env={}):
         """EXCEUTE A COMMAND"""
 
@@ -114,7 +93,7 @@ class DeployService:
             time.sleep(0.01)
 
             if proc.returncode != 0:
-                error=f"Failed to Execute command {command}"
+                error = f"Failed to Execute command {command}"
                 raise Exception(error)
 
         if output:
@@ -123,17 +102,22 @@ class DeployService:
         return "No output"
 
     @staticmethod
-    def terraform_env(port,project):
+    def terraform_env(port, project_name, account):
         """TERRAFORM ENVIRONMENT VARIABLES"""
+
+        instance_key = (account.key_name).split(".")[0]
+        access_key = base64.b64decode(account.access_key).decode()
+        secret_key = base64.b64decode(account.secret_key).decode()
+
         env = {
             "TF_VAR_aws_region": AWS_REGION,
-            "TF_VAR_aws_access_key": AWS_KEY,
-            "TF_VAR_aws_secret_access_key": AWS_SECRET_ACCESS_KEY,
+            "TF_VAR_aws_access_key": access_key,
+            "TF_VAR_aws_secret_access_key": secret_key,
             "TF_VAR_app_port": port,
             "TF_VAR_instance_ami": INSTANCE_AMI,
-            "TF_VAR_instance_key": INSTANCE_KEY,
+            "TF_VAR_instance_key": instance_key,
             "TF_VAR_instance_type": INSTANCE_TYPE,
-            "TF_VAR_project_name":project
+            "TF_VAR_project_name": project_name
         }
         return env
 
