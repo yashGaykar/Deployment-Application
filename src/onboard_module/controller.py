@@ -28,14 +28,15 @@ def add_account():
         aws_secret_key = data["aws_secret_key"]
         account_name = data["account_name"]
 
-        #Check if account name already exists
+        # Check if account name already exists
         logger.info("Checking if Account Already Exists")
         if AWSAccount.query.filter(AWSAccount.account_name == account_name).first() is not None:
             raise AccountNameAlreadyExists()
 
-        #Check credentials and permission required
+        # Check credentials and permission required
         logger.info("Checking if Invalid Credentials")
-        credentials = OnBoardService.invalid_credentials(aws_access_key, aws_secret_key)
+        credentials = OnBoardService.invalid_credentials(
+            aws_access_key, aws_secret_key)
         if credentials:
             raise WrongCredentials(message=credentials)
 
@@ -52,7 +53,8 @@ def add_account():
         )
         db.session.add(account_obj)
         db.session.commit()
-        logger.info(f"Created Account Successfully with 'id': {str(account_obj.id)}")
+        logger.info(
+            f"Created Account Successfully with 'id': {str(account_obj.id)}")
         return {"id": str(account_obj.id)}
 
     except AccountNameAlreadyExists:
@@ -81,7 +83,7 @@ def upload_key_pair():
         if account is not None:
             if not account.key_name:
                 # file.save(pem_file_path)
-                result=subprocess.run(f"ls",cwd="./private/keys_pairs/")
+                result = subprocess.run(f"ls", cwd="./private/keys_pairs/")
                 if result.returncode == 0:
                     account.key_name = file.filename
                     db.session.add(account)
@@ -94,26 +96,23 @@ def upload_key_pair():
         else:
             raise AccountDoesNotExists()
 
-        
-
     except AccountDoesNotExists:
-        error=f"Account Does not Exist with ID '{account_id}' "
+        error = f"Account Does not Exist with ID '{account_id}' "
         logger.error(error)
         return error_response(error, HTTPStatus.NOT_FOUND)
     except KeyAlreadyExists:
-        error=f"Key Already Exists with name '{account.key_name}' "
+        error = f"Key Already Exists with name '{account.key_name}' "
         logger.error(error)
         return error_response(error, HTTPStatus.ALREADY_REPORTED)
     except AccountNameAlreadyExists:
-        error=f"Account Name '{account.account_name}' Already Exists. Please try with other Account Name"
+        error = f"Account Name '{account.account_name}' Already Exists. Please try with other Account Name"
         logger.error(error)
-        return error_response(error , HTTPStatus.ALREADY_REPORTED)
+        return error_response(error, HTTPStatus.ALREADY_REPORTED)
     except NoFileFoundException:
-        error= "Please provide file to upload"
+        error = "Please provide file to upload"
         logger.error(error)
         return error_response(error, HTTPStatus.BAD_REQUEST)
     except AccountIdMissing:
-        error="Please provide Account ID"
+        error = "Please provide Account ID"
         logger.error(error)
         return error_response(error, HTTPStatus.BAD_REQUEST)
-

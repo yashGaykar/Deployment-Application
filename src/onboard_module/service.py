@@ -1,7 +1,6 @@
 import base64
 import boto3
-from botocore.exceptions import NoCredentialsError
-from botocore.exceptions import ClientError
+
 
 
 class OnBoardService:
