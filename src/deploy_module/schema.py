@@ -11,11 +11,14 @@ class DeploySchema(Schema):
     env = fields.Dict()
     port = fields.Number(required=True)
     project_name = fields.Str(required=True)
+    account_id = fields.Number(required=True)
 
 
 class CleanUpSchema(Schema):
     """Clean Up Schema"""
     project_name = fields.Str(required=True)
+    account_id = fields.Number(required=True)
+
 
 
 class TaskStatusSchema(Schema):
