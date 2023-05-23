@@ -1,3 +1,4 @@
+alembic==1.11.1
 amqp==5.1.1
 ansible==6.7.0
 ansible-core==2.13.8
@@ -18,16 +19,22 @@ dnspython==2.3.0
 docutils==0.19
 exceptiongroup==1.1.1
 Flask==2.2.3
+Flask-Migrate==4.0.4
+Flask-PyMongo==2.3.0
+Flask-SQLAlchemy==3.0.3
 gitdb==4.0.10
 GitPython==3.1.31
+greenlet==2.0.2
 idna==3.4
 importlib-metadata==6.0.0
+importlib-resources==5.12.0
 iniconfig==2.0.0
 itsdangerous==2.1.2
 Jinja2==3.1.2
 jmespath==1.0.1
 kombu==5.2.4
 lockfile==0.12.2
+Mako==1.2.4
 MarkupSafe==2.1.2
 marshmallow==3.19.0
 packaging==23.0
@@ -37,6 +44,7 @@ prompt-toolkit==3.0.38
 ptyprocess==0.7.0
 pycparser==2.21
 pymongo==4.3.3
+PyMySQL==1.0.3
 pytest==7.3.1
 python-daemon==3.0.1
 python-dateutil==2.8.2
@@ -48,7 +56,9 @@ resolvelib==0.8.1
 s3transfer==0.6.0
 six==1.16.0
 smmap==5.0.0
+SQLAlchemy==2.0.13
 tomli==2.0.1
+typing_extensions==4.5.0
 urllib3==1.26.15
 vine==5.0.0
 wcwidth==0.2.6

@@ -33,20 +33,12 @@ provider "aws" {
   secret_key = var.aws_secret_access_key
 }
 
-
-provider "tls" {}
-
-module "ec2_key" {
-  source       = "../../templates/terraform/terraform_modules/ec2_key"
-  project_name = var.project_name
-}
-
 module "instance" {
   source = "../../templates/terraform/terraform_modules/ec2_instance"
   # source = "yashGaykar/ec2-instance/aws"
   # version  = "1.0.0"
   instance_ami      = var.instance_ami
-  instance_key      = module.ec2_key.key_name
+  instance_key      = var.instance_key
   instance_type     = var.instance_type
   security_group_id = module.security_group.security_group_id
   project_name      = var.project_name
